@@ -37,6 +37,7 @@ class Chef
           ui.color('Public IP', :bold),
           ui.color('Private IP', :bold),
           ui.color('Flavor', :bold),
+          ui.color('AZ', :bold),
           ui.color('Image', :bold),
           ui.color('SSH Key', :bold),
           ui.color('Security Groups', :bold),
@@ -47,6 +48,7 @@ class Chef
           server_list << server.public_ip_address.to_s
           server_list << server.private_ip_address.to_s
           server_list << server.flavor_id.to_s
+          server_list << server.availability_zone.to_s
           server_list << server.image_id.to_s
           server_list << server.key_name.to_s
           server_list << server.groups.join(", ")
@@ -62,7 +64,7 @@ class Chef
             end
           end
         end
-        puts ui.list(server_list, :uneven_columns_across, 8)
+        puts ui.list(server_list, :uneven_columns_across, server_list.length)
 
       end
     end
