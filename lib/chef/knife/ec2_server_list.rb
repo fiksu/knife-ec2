@@ -43,6 +43,9 @@ class Chef
           ui.color('Security Groups', :bold),
           ui.color('State', :bold)
         ]
+        
+        output_column_count = server_list.length
+
         connection.servers.all.each do |server|
           server_list << server.id.to_s
           server_list << server.public_ip_address.to_s
@@ -64,7 +67,7 @@ class Chef
             end
           end
         end
-        puts ui.list(server_list, :uneven_columns_across, server_list.length)
+        puts ui.list(server_list, :uneven_columns_across, output_column_count)
 
       end
     end
