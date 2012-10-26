@@ -27,6 +27,18 @@ class Chef
 
       banner "knife ec2 server list (options)"
 
+      option :name,
+        :short => "-n",
+        :long => "--no-name",
+        :boolean => true,
+        :default => true,
+        :description => "Do not display name tag in output"
+
+      option :tags,
+        :short => "-t TAG1,TAG2",
+        :long => "--tags TAG1,TAG2",
+        :description => "List of tags to output"
+
       def run
         $stdout.sync = true
 
@@ -34,6 +46,11 @@ class Chef
 
         server_list = [
           ui.color('Instance ID', :bold),
+        
+          if config[:name]
+            ui.color("Name", :bold)
+          end,
+
           ui.color('Public IP', :bold),
           ui.color('Private IP', :bold),
           ui.color('Flavor', :bold),
@@ -41,13 +58,25 @@ class Chef
           ui.color('Image', :bold),
           ui.color('SSH Key', :bold),
           ui.color('Security Groups', :bold),
+          
+          if config[:tags]
+            config[:tags].split(",").collect do |tag_name|
+              ui.color("Tag:#{tag_name}", :bold)
+            end
+          end,
+          
           ui.color('State', :bold)
-        ]
+        ].flatten.compact
         
         output_column_count = server_list.length
-
+        
         connection.servers.all.each do |server|
           server_list << server.id.to_s
+          
+          if config[:name]
+            server_list << server.tags["Name"].to_s
+          end
+          
           server_list << server.public_ip_address.to_s
           server_list << server.private_ip_address.to_s
           server_list << server.flavor_id.to_s
@@ -55,6 +84,13 @@ class Chef
           server_list << server.image_id.to_s
           server_list << server.key_name.to_s
           server_list << server.groups.join(", ")
+          
+          if config[:tags]
+            config[:tags].split(",").each do |tag_name|
+              server_list << server.tags[tag_name].to_s
+            end
+          end
+          
           server_list << begin
             state = server.state.to_s.downcase
             case state
@@ -73,5 +109,3 @@ class Chef
     end
   end
 end
-
-
